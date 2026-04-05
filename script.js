@@ -59,10 +59,10 @@ const gameOverSound = new Audio('assets/gameover.mp3');
 
 const bgMusic = new Audio('assets/bg.mp3');
 bgMusic.loop = true;
-placeSound.volume = 0.5;
-clearSound.volume = 0.6;
-gameOverSound.volume = 0.7;
-bgMusic.volume = 0.005;
+placeSound.volume = 0.1;
+clearSound.volume = 0.1;
+gameOverSound.volume = 0.1;
+bgMusic.volume = 0.008;
 /* ──────────────────────────────────────────────────────────
    GAME STATE
 ────────────────────────────────────────────────────────── */
