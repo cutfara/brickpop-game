@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrickPop — Block Puzzle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="start-screen" id="startScreen">
+  <div class="start-card">
+    <h1 class="start-logo">BRICK<span>POP</span></h1>
+    <p class="start-sub">Fill rows and columns to score big ✨</p>
+    <button id="btnStartGame" class="btn-start">PLAY</button>
+  </div>
+</div>
+  <!-- ── AMBIENT BACKGROUND ─────────────────────────── -->
+  <div class="bg-layer" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- ── MAIN GAME CONTAINER ───────────────────────── -->
+  <div class="game-container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <h1 class="logo">BRICK<span>POP</span></h1>
+      <div class="header-scores">
+        <div class="score-pill">
+          <span class="pill-label">SCORE</span>
+          <span class="pill-val" id="scoreVal">0</span>
+        </div>
+        <div class="score-pill best">
+          <span class="pill-label">BEST</span>
+          <span class="pill-val" id="bestVal">0</span>
+        </div>
+        <div class="score-pill level">
+  <span class="pill-label">LEVEL</span>
+  <span class="pill-val" id="levelVal">1</span>
+</div>
+<div class="score-pill coin">
+  <span class="pill-label">COINS</span>
+  <span class="pill-val" id="coinVal">0</span>
+</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+  <button class="btn-icon" id="btnPause" title="Pause">⏸</button>
+  <button class="btn-icon" id="btnMusic" title="Music">🔊</button>
+  <button class="btn-icon" id="btnRestart" title="Restart Game">↺</button>
+</div>
+    </header>
+
+    <!-- BOARD -->
+    <section class="board-shell" aria-label="Game Board">
+      <div class="board" id="board"></div>
+    </section>
+
+    <!-- PIECE TRAY -->
+    <section class="tray" aria-label="Available Pieces">
+      <div class="tray-inner">
+        <div class="piece-slot" id="slot-0" data-slot="0"></div>
+        <div class="tray-divider"></div>
+        <div class="piece-slot" id="slot-1" data-slot="1"></div>
+        <div class="tray-divider"></div>
+        <div class="piece-slot" id="slot-2" data-slot="2"></div>
+      </div>
+    </section>
+
+    <!-- HINT -->
+    <p class="hint">Drag pieces onto the board · Fill a row or column to clear it</p>
+
+  </div>
+
+  <!-- ── GAME OVER OVERLAY ──────────────────────────── -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-boom">💥</div>
+      <p class="modal-title">GAME OVER</p>
+      <div class="modal-stats">
+        <div class="mstat">
+          <div class="mstat-label">SCORE</div>
+          <div class="mstat-val" id="modalScore">0</div>
+        </div>
+        <div class="mstat-sep"></div>
+        <div class="mstat">
+          <div class="mstat-label">BEST</div>
+          <div class="mstat-val accent" id="modalBest">0</div>
+        </div>
+      </div>
+      <button class="btn-again" id="btnPlayAgain">PLAY AGAIN</button>
+    </div>
+  </div>
+<div class="pause-overlay" id="pauseOverlay">
+  <div class="pause-modal">
+    <p>PAUSED</p>
+    <span>Game is temporarily stopped</span>
+    <button id="btnResumeGame" class="btn-resume">RESUME</button>
+  </div>
+</div>
+<div class="level-popup" id="levelPopup">
+  LEVEL UP!
+</div>
+<div class="achievement-popup" id="achievementPopup">
+  🏆 Achievement Unlocked!
+</div>
+<div class="reward-popup" id="rewardPopup">
+  <p id="rewardDayText">🎁 Day 1 Reward</p>
+  <span>+100 Coins</span>
+</div>
+<button id="shopToggle" class="shop-toggle-btn">
+  🛒 Shop
+</button>
+<div class="shop-panel" id="shopPanel">
+  <h3>🎨 Theme Shop</h3>
+
+  <button id="buyNeonBtn" class="shop-btn">
+    Neon Blue (500)
+  </button>
+
+  <button id="buyCandyBtn" class="shop-btn">
+    Candy Pink (700)
+  </button>
+
+  <button id="buyGalaxyBtn" class="shop-btn">
+    Galaxy (1000)
+  </button>
+
+  <button id="resetThemeBtn" class="shop-btn reset-btn">
+    Reset Theme
+  </button>
+</div>
+  <script src="script.js"></script>
+</body>
+</html>
