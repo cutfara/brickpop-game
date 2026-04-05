@@ -59,7 +59,7 @@ const gameOverSound = new Audio('assets/gameover.mp3');
 
 const bgMusic = new Audio('assets/bg.mp3');
 bgMusic.loop = true;
-bgMusic.volume = 0.4;
+bgMusic.volume = 0.15;
 /* ──────────────────────────────────────────────────────────
    GAME STATE
 ────────────────────────────────────────────────────────── */
