@@ -62,7 +62,7 @@ bgMusic.loop = true;
 placeSound.volume = 0.5;
 clearSound.volume = 0.6;
 gameOverSound.volume = 0.7;
-bgMusic.volume = 0.12;
+bgMusic.volume = 0.03;
 /* ──────────────────────────────────────────────────────────
    GAME STATE
 ────────────────────────────────────────────────────────── */
