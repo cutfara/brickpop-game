@@ -523,6 +523,10 @@ body {
   cursor: pointer;
   transition: transform 0.2s ease;
 }
+.continue-btn {
+  margin-top: 12px;
+  background: linear-gradient(135deg, var(--yellow), var(--orange));
+}
 
 .btn-start:hover {
   transform: scale(1.05);
@@ -608,6 +612,47 @@ body {
 .reward-popup.show {
   transform: translateX(-50%) scale(1);
 }
+.level-popup {
+  position: fixed;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: linear-gradient(135deg, var(--cyan), var(--sky));
+  color: black;
+  padding: 16px 32px;
+  border-radius: 30px;
+  font-family: 'Orbitron', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  z-index: 20000;
+  box-shadow: 0 0 24px rgba(0, 245, 212, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.level-popup.show {
+  animation: levelPopupBounce 1.2s ease forwards;
+}
+
+@keyframes levelPopupBounce {
+  0% {
+    transform: translateX(-50%) scale(0);
+    opacity: 0;
+  }
+
+  30% {
+    transform: translateX(-50%) scale(1.2);
+    opacity: 1;
+  }
+
+  60% {
+    transform: translateX(-50%) scale(1);
+  }
+
+  100% {
+    transform: translateX(-50%) scale(0);
+    opacity: 0;
+  }
+}
 .score-pill.coin {
   border-color: var(--yellow);
 }
@@ -653,4 +698,23 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
-
+.shop-btn:disabled {
+  background: #555;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+.mission-box {
+  width: 100%;
+  max-width: calc(var(--cell-size)*8 + var(--cell-gap)*7 + 28px);
+  background: linear-gradient(135deg, var(--yellow), var(--orange));
+  color: black;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 0 18px rgba(255, 200, 0, 0.35);
+}
