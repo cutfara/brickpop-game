@@ -13,10 +13,14 @@
 
 <div class="start-screen" id="startScreen">
   <div class="start-card">
-    <h1 class="start-logo">BRICK<span>POP</span></h1>
-    <p class="start-sub">Fill rows and columns to score big ✨</p>
-    <button id="btnStartGame" class="btn-start">PLAY</button>
-  </div>
+  <h1 class="start-logo">BRICK<span>POP</span></h1>
+  <p class="start-sub">Fill rows and columns to score big ✨</p>
+
+  <button id="btnStartGame" class="btn-start">PLAY</button>
+  <button id="btnContinueGame" class="btn-start continue-btn">
+    CONTINUE
+  </button>
+</div>
 </div>
   <!-- ── AMBIENT BACKGROUND ─────────────────────────── -->
   <div class="bg-layer" aria-hidden="true">
@@ -57,6 +61,9 @@
     </header>
 
     <!-- BOARD -->
+     <div class="mission-box" id="missionBox">
+  🎯 Reach 1000 score
+</div>
     <section class="board-shell" aria-label="Game Board">
       <div class="board" id="board"></div>
     </section>
