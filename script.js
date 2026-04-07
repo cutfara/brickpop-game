@@ -56,9 +56,10 @@ const COLORS = [
 const placeSound = new Audio('assets/place.mp3');
 const clearSound = new Audio('assets/clear.mp3');
 const gameOverSound = new Audio('assets/gameover.mp3');
-
 const bgMusic = new Audio('assets/bg.mp3');
+const clickSound = new Audio('assets/click.mp3');
 bgMusic.loop = true;
+clickSound.volume = 0.7;
 placeSound.volume = 0.8;
 clearSound.volume = 0.9;
 gameOverSound.volume = 1.0;
@@ -80,6 +81,8 @@ let pieces   = [null, null, null];  // current 3 available pieces
 let drag     = null;        // active drag descriptor
 let litCells = [];          // board cells currently highlighted
 let combo = 0;
+let currentMission = 'score1000';
+let missionCompleted = false;
 let isPaused = false;
 let soundOn = true;
 
@@ -101,6 +104,7 @@ const $levelPopup = document.getElementById('levelPopup');
 const $achievementPopup = document.getElementById('achievementPopup');
 const $rewardPopup = document.getElementById('rewardPopup');
 const $rewardDayText = document.getElementById('rewardDayText');
+const $missionBox = document.getElementById('missionBox');
 const $overlay    = document.getElementById('overlay');
 const $modalScore = document.getElementById('modalScore');
 const $modalBest  = document.getElementById('modalBest');
@@ -112,6 +116,7 @@ const $btnResumeGame = document.getElementById('btnResumeGame');
 const $btnAgain   = document.getElementById('btnPlayAgain');
 const $startScreen = document.getElementById('startScreen');
 const $btnStartGame = document.getElementById('btnStartGame');
+const $btnContinueGame = document.getElementById('btnContinueGame');
 const slots       = [0, 1, 2].map(i => document.getElementById(`slot-${i}`));
 
 /* ──────────────────────────────────────────────────────────
@@ -149,44 +154,164 @@ function canFit(cells, sr, sc) {
            !board[r][c];
   });
 }
+/* SAVE GAME PROGRESS */
+function saveGameProgress() {
+  localStorage.setItem('bp_board', JSON.stringify(board));
+  localStorage.setItem('bp_score', score);
+  localStorage.setItem('bp_level', level);
+  localStorage.setItem('bp_pieces', JSON.stringify(pieces));
+  localStorage.setItem('bp_combo', combo);
+}
 
+function loadGameProgress() {
+  const savedBoard = localStorage.getItem('bp_board');
+  const savedScore = localStorage.getItem('bp_score');
+  const savedLevel = localStorage.getItem('bp_level');
+  const savedPieces = localStorage.getItem('bp_pieces');
+  const savedCombo = localStorage.getItem('bp_combo');
+
+  if (!savedBoard) return false;
+
+  board = JSON.parse(savedBoard);
+  score = parseInt(savedScore || '0');
+  level = parseInt(savedLevel || '1');
+  pieces = JSON.parse(savedPieces || '[null,null,null]');
+  combo = parseInt(savedCombo || '0');
+
+  return true;
+}
+
+function clearSavedProgress() {
+  localStorage.removeItem('bp_board');
+  localStorage.removeItem('bp_score');
+  localStorage.removeItem('bp_level');
+  localStorage.removeItem('bp_pieces');
+  localStorage.removeItem('bp_combo');
+}
+
+function checkContinueButton() {
+  const hasSave = localStorage.getItem('bp_board');
+
+  if (!hasSave) {
+    $btnContinueGame.style.display = 'none';
+  } else {
+    $btnContinueGame.style.display = 'block';
+  }
+}
 /** Mini cell size in the tray (responsive) */
 function miniCellPx() {
   if (window.innerWidth <= 400) return 22;
   if (window.innerWidth <= 520) return 26;
   return 32;
 }
+function playClickSound() {
+  if (!soundOn) return;
 
+  clickSound.currentTime = 0;
+  clickSound.play();
+}
+function updateMission() {
+  if (currentMission === 'score1000') {
+    $missionBox.textContent = '🎯 Reach 1000 score';
+  }
+
+  if (currentMission === 'clear3lines') {
+    $missionBox.textContent = '💥 Clear 3 lines in one move';
+  }
+
+  if (currentMission === 'level10') {
+    $missionBox.textContent = '🏆 Reach level 10';
+  }
+}
+
+function completeMission() {
+  missionCompleted = true;
+
+  $missionBox.textContent = '✅ MISSION COMPLETE!';
+  $missionBox.style.background =
+    'linear-gradient(135deg, var(--cyan), var(--sky))';
+
+  coins += 300;
+  refreshScore();
+
+  setTimeout(() => {
+    nextMission();
+  }, 1500);
+}
+
+function nextMission() {
+  missionCompleted = false;
+
+  if (currentMission === 'score1000') {
+    currentMission = 'clear3lines';
+  } else if (currentMission === 'clear3lines') {
+    currentMission = 'level10';
+  } else {
+    currentMission = 'score1000';
+  }
+
+  updateMission();
+}
+
+function checkMission(linesCleared = 0) {
+  if (missionCompleted) return;
+
+  if (currentMission === 'score1000' && score >= 1000) {
+    completeMission();
+  }
+
+  if (currentMission === 'clear3lines' && linesCleared >= 3) {
+    completeMission();
+  }
+
+  if (currentMission === 'level10' && level >= 10) {
+    completeMission();
+  }
+}
 /* ──────────────────────────────────────────────────────────
    INITIALISE / RESTART
 ────────────────────────────────────────────────────────── */
 function init() {
   readDims();
 
-  board  = Array.from({ length: BOARD_N }, () => Array(BOARD_N).fill(0));
-  score = 0;
-level = 1;
-lastLevel = 1;
-combo = 0;
-best = parseInt(localStorage.getItem('bp_best') || '0');
-coins = parseInt(localStorage.getItem('bp_coins') || '0');
+  const hasSave = loadGameProgress();
 
-ownedThemes = JSON.parse(
-  localStorage.getItem('bp_owned_themes') || '[]'
-);
+  if (!hasSave) {
+    board = Array.from(
+      { length: BOARD_N },
+      () => Array(BOARD_N).fill(0)
+    );
 
-unlockedAchievements = JSON.parse(
-  localStorage.getItem('bp_achievements') || '[]'
-);
-  pieces = [null, null, null];
+    score = 0;
+    level = 1;
+    lastLevel = 1;
+    combo = 0;
+    pieces = [null, null, null];
+
+    spawnPieces();
+  }
+
+  best = parseInt(localStorage.getItem('bp_best') || '0');
+  coins = parseInt(localStorage.getItem('bp_coins') || '0');
+
+  ownedThemes = JSON.parse(
+    localStorage.getItem('bp_owned_themes') || '[]'
+  );
+
+  unlockedAchievements = JSON.parse(
+    localStorage.getItem('bp_achievements') || '[]'
+  );
 
   refreshScore();
   renderBoard();
-  spawnPieces();
+
+  pieces.forEach((_, i) => drawSlot(i));
+
   hideOverlay();
   checkDailyReward();
   applySavedTheme();
   updateThemeButtons();
+  updateMission();
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -204,12 +329,18 @@ function addScore(pts, cx, cy) {
 
 function refreshScore() {
   function showLevelPopup() {
-  $levelPopup.classList.add('show');
+    $levelPopup.textContent = `LEVEL ${level}`;
 
-  setTimeout(() => {
     $levelPopup.classList.remove('show');
-  }, 1200);
-}
+
+    void $levelPopup.offsetWidth;
+
+    $levelPopup.classList.add('show');
+
+    setTimeout(() => {
+      $levelPopup.classList.remove('show');
+    }, 1200);
+  }
 function checkAchievements() {
   if (score >= 500 && !unlockedAchievements.includes('rookie')) {
     unlockedAchievements.push('rookie');
@@ -251,7 +382,9 @@ if (level > lastLevel) {
   $bestVal.textContent  = best;
   $levelVal.textContent = level;
   $coinVal.textContent = coins;
-
+  
+  updateThemeButtons();
+  checkMission();
   triggerBump($scoreVal);
   checkAchievements();
   saveProgress();
@@ -558,6 +691,7 @@ function placePiece(pieceIdx, sr, sc, cx, cy) {
       spawnPieces();
     }
     checkGameOver();
+    saveGameProgress();
   });
 }
 
@@ -614,6 +748,7 @@ if (!fullRows.length && !fullCols.length) {
 
     /* Score based on lines cleared (combos give bonus) */
     const n   = fullRows.length + fullCols.length;
+    checkMission(n);
     combo++;
 
 let pts = n === 1 ? 100 : n === 2 ? 250 : n * 200;
@@ -689,18 +824,41 @@ document.addEventListener('touchend', e => {
 
 /* Buttons */
 $shopToggle.addEventListener('click', () => {
+  playClickSound();
   if ($shopPanel.style.display === 'none' || !$shopPanel.style.display) {
     $shopPanel.style.display = 'block';
   } else {
     $shopPanel.style.display = 'none';
   }
 });
-$btnRestart.addEventListener('click', init);
-$buyNeonBtn.addEventListener('click', () => buyTheme('neon', 500));
-$buyCandyBtn.addEventListener('click', () => buyTheme('candy', 700));
-$buyGalaxyBtn.addEventListener('click', () => buyTheme('galaxy', 1000));
-$resetThemeBtn.addEventListener('click', resetTheme);
+$btnRestart.addEventListener('click', () => {
+  playClickSound();
+  clearSavedProgress();
+  init();
+});
+$buyNeonBtn.addEventListener('click', () => {
+  playClickSound();
+  buyTheme('neon', 500);
+});
+
+$buyCandyBtn.addEventListener('click', () => {
+  playClickSound();
+  buyTheme('candy', 700);
+});
+
+$buyGalaxyBtn.addEventListener('click', () => {
+  playClickSound();
+  buyTheme('galaxy', 1000);
+});
+
+$resetThemeBtn.addEventListener('click', () => {
+  playClickSound();
+  resetTheme();
+});
+
 $btnMusic.addEventListener('click', () => {
+  playClickSound();
+
   soundOn = !soundOn;
 
   if (soundOn) {
@@ -713,6 +871,7 @@ $btnMusic.addEventListener('click', () => {
 });
 
 $btnPause.addEventListener('click', () => {
+  playClickSound();
   isPaused = !isPaused;
 
 if (isPaused) {
@@ -726,11 +885,15 @@ if (isPaused) {
 }
 });
 $btnResumeGame.addEventListener('click', () => {
+  playClickSound();
   isPaused = false;
   $btnPause.textContent = '⏸';
   $pauseOverlay.style.display = 'none';
 });
-$btnAgain.addEventListener('click', init);
+$btnAgain.addEventListener('click', () => {
+  clearSavedProgress();
+  init();
+});
 
 /* Refresh dimensions & redraw slots on window resize */
 window.addEventListener('resize', () => {
@@ -742,11 +905,27 @@ window.addEventListener('resize', () => {
    BOOT
 ────────────────────────────────────────────────────────── */
 document.querySelector('.game-container').style.display = 'none';
+checkContinueButton();
+
 $btnStartGame.addEventListener('click', () => {
+  playClickSound();
+
+  clearSavedProgress();
+
   $startScreen.style.display = 'none';
   document.querySelector('.game-container').style.display = 'flex';
 
-  bgMusic.play();
+  if (soundOn) bgMusic.play();
+
+  init();
+});
+
+$btnContinueGame.addEventListener('click', () => {
+  playClickSound();
+  $startScreen.style.display = 'none';
+  document.querySelector('.game-container').style.display = 'flex';
+
+  if (soundOn) bgMusic.play();
 
   init();
 });
@@ -877,7 +1056,10 @@ function updateThemeButtons() {
     $buyNeonBtn.textContent =
       activeTheme === 'neon' ? 'Using ✓' : 'Use Theme';
   } else {
-    $buyNeonBtn.textContent = 'Neon Blue (500 Coins)';
+    $buyNeonBtn.textContent =
+  coins < 500
+    ? '🔒 Neon Blue (500 Coins)'
+    : 'Neon Blue (500 Coins)';
   }
 
   // Candy
@@ -885,7 +1067,10 @@ function updateThemeButtons() {
     $buyCandyBtn.textContent =
       activeTheme === 'candy' ? 'Using ✓' : 'Use Theme';
   } else {
-    $buyCandyBtn.textContent = 'Candy Pink (700 Coins)';
+    $buyCandyBtn.textContent =
+  coins < 700
+    ? '🔒 Candy Pink (700 Coins)'
+    : 'Candy Pink (700 Coins)';
   }
 
   // Galaxy
@@ -893,8 +1078,19 @@ function updateThemeButtons() {
     $buyGalaxyBtn.textContent =
       activeTheme === 'galaxy' ? 'Using ✓' : 'Use Theme';
   } else {
-    $buyGalaxyBtn.textContent = 'Galaxy (1000 Coins)';
+    $buyGalaxyBtn.textContent =
+  coins < 1000
+    ? '🔒 Galaxy (1000 Coins)'
+    : 'Galaxy (1000 Coins)';
   }
+  $buyNeonBtn.disabled =
+  !ownedThemes.includes('neon') && coins < 500;
+
+$buyCandyBtn.disabled =
+  !ownedThemes.includes('candy') && coins < 700;
+
+$buyGalaxyBtn.disabled =
+  !ownedThemes.includes('galaxy') && coins < 1000;
 }
 function resetTheme() {
   localStorage.removeItem('bp_theme');
@@ -918,3 +1114,6 @@ function animateCoins(from, to) {
     $coinVal.textContent = current;
   }, 40);
 }
+window.addEventListener('beforeunload', () => {
+  saveGameProgress();
+});
