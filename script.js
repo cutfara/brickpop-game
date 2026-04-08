@@ -53,6 +53,47 @@ const COLORS = [
   '#4cc9f0', // sky
   '#ff85a1', // rose
 ];
+const CHARACTER_THEME = {
+  '#00f5d4': {
+    name: 'Squidward',
+    image: 'assets/squidward.jpg'
+  },
+
+  '#f72585': {
+    name: 'Patrick',
+    image: 'assets/patrick.png'
+  },
+
+  '#fee440': {
+    name: 'SpongeBob',
+    image: 'assets/spongebob.png'
+  },
+
+  '#80ff44': {
+    name: 'Plankton',
+    image: 'assets/plankton.png'
+  },
+
+  '#ff6b35': {
+    name: 'Gary',
+    image: 'assets/gary.jpg'
+  },
+
+  '#a855f7': {
+    name: 'Karen',
+    image: 'assets/karen.jpg'
+  },
+
+  '#4cc9f0': {
+    name: 'Sandy',
+    image: 'assets/sandy.jpg'
+  },
+
+  '#ff85a1': {
+    name: 'Mr Krabs',
+    image: 'assets/mrkrabs.jpg'
+  }
+};
 const placeSound = new Audio('assets/place.mp3');
 const clearSound = new Audio('assets/clear.mp3');
 const gameOverSound = new Audio('assets/gameover.mp3');
@@ -447,10 +488,15 @@ function cellEl(r, c) {
 }
 
 /** Visually fill a cell element with the given colour */
-function applyFilledStyle(el, color) {
+function applyFilledStyle(el, piece) {
   el.classList.add('filled');
-  el.style.background = color;
-  el.style.boxShadow  = `0 0 11px ${color}80`;
+
+  el.style.backgroundImage = `url(${piece.image})`;
+  el.style.backgroundSize = 'cover';
+  el.style.backgroundPosition = 'center';
+  el.style.backgroundRepeat = 'no-repeat';
+
+  el.style.boxShadow = `0 0 11px ${piece.color}80`;
 }
 
 /** Visually empty a cell element */
@@ -467,11 +513,23 @@ function clearCellStyle(el) {
 function spawnPieces() {
   for (let i = 0; i < 3; i++) {
     if (pieces[i] === null) {
+
+      // pilih warna random dari 8 warna
+      const selectedColor = pick(COLORS);
+
+      // ambil data karakter berdasarkan warna
+      const selectedCharacter =
+        CHARACTER_THEME[selectedColor];
+
+      // buat piece baru
       pieces[i] = {
-        cells: [...pick(SHAPES)],   // clone shape
-        color: pick(COLORS),
+        cells: [...pick(SHAPES)],
+        color: selectedColor,
+        image: selectedCharacter.image,
+        character: selectedCharacter.name
       };
     }
+
     drawSlot(i);
   }
 }
@@ -506,8 +564,8 @@ function drawSlot(i) {
       d.style.height = MINI + 'px';
 
       if (p.cells.some(([pr, pc]) => pr === r && pc === c)) {
-        d.style.background = p.color;
-        d.style.boxShadow  = `0 0 6px ${p.color}90`;
+       d.style.background = `url(${p.image}) center/cover`;
+d.style.boxShadow  = `0 0 6px ${p.color}90`;
       } else {
         d.classList.add('blank');
       }
@@ -662,12 +720,24 @@ function placePiece(pieceIdx, sr, sc, cx, cy) {
   const p = pieces[pieceIdx];
 
   /* Write colour to board data + DOM */
-  p.cells.forEach(([dr, dc]) => {
-    const r = sr + dr, c = sc + dc;
-    board[r][c] = p.color;
-    const el = cellEl(r, c);
-    if (el) applyFilledStyle(el, p.color);
-  });
+p.cells.forEach(([dr, dc]) => {
+  const r = sr + dr;
+  const c = sc + dc;
+
+  // simpan seluruh object piece
+  board[r][c] = {
+    color: p.color,
+    image: p.image,
+    character: p.character
+  };
+
+  // tampilkan ke board
+  const el = cellEl(r, c);
+
+  if (el) {
+    applyFilledStyle(el, board[r][c]);
+  }
+});
 
   /* +10 for placing a block */
   addScore(10, cx, cy);
